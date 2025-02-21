@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Constitución de 1832</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background-color: #f4f4f4; }
+        .quiz-container { max-width: 600px; margin: auto; padding: 20px; background: white; border: 2px solid #007BFF; border-radius: 10px; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); }
+        .question { margin-bottom: 15px; font-weight: bold; padding: 10px; border-radius: 5px; transition: background 0.5s; }
+        .correct { background-color: #d4edda; }
+        .incorrect { background-color: #f8d7da; }
+        .timer { font-size: 14px; color: red; font-weight: bold; }
+        button { margin-top: 20px; padding: 10px; cursor: pointer; background-color: #007BFF; color: white; border: none; border-radius: 5px; }
+        button:hover { background-color: #0056b3; }
+        .result { margin-top: 20px; font-size: 18px; font-weight: bold; }
+        img { width: 100px; display: block; margin: auto; }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h2>Quiz sobre la Constitución de 1832</h2>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Escudo_de_la_Rep%C3%BAblica_de_Nueva_Granada.svg/1200px-Escudo_de_la_Rep%C3%BAblica_de_Nueva_Granada.svg.png" alt="Escudo de Nueva Granada">
+        <form id="quizForm">
+            <div id="preguntas"></div>
+            <button type="button" onclick="calcularResultado()">Enviar respuestas</button>
+        </form>
+        <p class="result" id="resultado"></p>
+        <audio id="audioAplausos" src="https://www.fesliyanstudios.com/play-mp3/387" preload="auto"></audio>
+        <audio id="audioError" src="https://www.fesliyanstudios.com/play-mp3/398" preload="auto"></audio>
+    </div>
+    <script>
+        const preguntas = [
+            { pregunta: "¿Qué tipo de gobierno estableció la Constitución de 1832?", opciones: ["Republicano y representativo", "Monarquía absoluta"], respuesta: "Republicano y representativo" },
+            { pregunta: "¿Cómo estaba dividido el Congreso?", opciones: ["En Senadores y Representantes", "Solo en una cámara legislativa"], respuesta: "En Senadores y Representantes" },
+            { pregunta: "¿Qué derecho garantizaba la Constitución en cuanto a la prensa?", opciones: ["Libertad de prensa", "Censura total de la prensa"], respuesta: "Libertad de prensa" },
+            { pregunta: "¿Cuál era la duración del mandato presidencial?", opciones: ["Cuatro años", "Seis años"], respuesta: "Cuatro años" },
+            { pregunta: "¿Se permitían títulos nobiliarios en la Constitución de 1832?", opciones: ["No, estaban prohibidos", "Sí, eran hereditarios"], respuesta: "No, estaban prohibidos" },
+            { pregunta: "¿Qué entidad se encargaba de la administración de justicia?", opciones: ["El poder judicial", "El poder ejecutivo"], respuesta: "El poder judicial" },
+            { pregunta: "¿Quién tenía derecho al voto según la Constitución de 1832?", opciones: ["Solo hombres con propiedades", "Toda la población"], respuesta: "Solo hombres con propiedades" },
+            { pregunta: "¿Cuál era la capital de la República de la Nueva Granada?", opciones: ["Bogotá", "Cartagena"], respuesta: "Bogotá" }
+        ];
+        
+        const contenedorPreguntas = document.getElementById("preguntas");
+        preguntas.forEach((p, i) => {
+            let div = document.createElement("div");
+            div.classList.add("question");
+            div.innerHTML = `<p>${i + 1}. ${p.pregunta}</p>
+                <p class='timer' id='timer${i}'>Tiempo restante: 10s</p>
+                <input type="radio" name="q${i}" value="${p.opciones[0]}"> ${p.opciones[0]}<br>
+                <input type="radio" name="q${i}" value="${p.opciones[1]}"> ${p.opciones[1]}<br>`;
+            contenedorPreguntas.appendChild(div);
+            iniciarTemporizador(i);
+        });
+        
+        function iniciarTemporizador(i) {
+            let tiempo = 10;
+            let timerElement = document.getElementById(`timer${i}`);
+            let interval = setInterval(() => {
+                tiempo--;
+                timerElement.innerText = `Tiempo restante: ${tiempo}s`;
+                if (tiempo <= 0) {
+                    clearInterval(interval);
+                    timerElement.innerText = "Tiempo agotado";
+                    document.getElementsByClassName("question")[i].classList.add("incorrect");
+                }
+            }, 1000);
+        }
+        
+        function calcularResultado() {
+            let respuestasCorrectas = 0;
+            let totalPreguntas = preguntas.length;
+            let incorrectas = [];
+            
+            preguntas.forEach((p, i) => {
+                let seleccion = document.querySelector(`input[name="q${i}"]:checked`);
+                let divPregunta = document.getElementsByClassName("question")[i];
+                if (seleccion) {
+                    if (seleccion.value === p.respuesta) {
+                        respuestasCorrectas++;
+                        divPregunta.classList.add("correct");
+                    } else {
+                        divPregunta.classList.add("incorrect");
+                        incorrectas.push(`${i + 1}. ${p.pregunta} (Respuesta correcta: ${p.respuesta})`);
+                    }
+                } else {
+                    divPregunta.classList.add("incorrect");
+                    incorrectas.push(`${i + 1}. ${p.pregunta} (Respuesta correcta: ${p.respuesta})`);
+                }
+            });
+            
+            let porcentaje = (respuestasCorrectas / totalPreguntas) * 100;
+            document.getElementById("resultado").innerHTML = `Tu puntaje: ${porcentaje.toFixed(2)}%<br><br>
+                <strong>Preguntas incorrectas:</strong><br>${incorrectas.join("<br>")}`;
+            
+            if (porcentaje >= 50) {
+                document.getElementById("audioAplausos").play();
+            } else {
+                document.getElementById("audioError").play();
+            }
+        }
+    </script>
+</body>
+</html>
